@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Undercover",
+      "hasCanvas": false,
+      "bodyTextLen": 218,
+      "bodyTextHash": "9c18fbcdc6bf533e6b0b9108a90aaa93d1835ddf6a9e3aa0f6f373cbf04ca450",
+      "bodyTextPrefix": "DOSSIER CONFIDENTIEL FR EN DOSSIER DE SOIRÉE Undercover Un mot. ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Undercover",
+      "hasCanvas": false,
+      "bodyTextLen": 218,
+      "bodyTextHash": "9c18fbcdc6bf533e6b0b9108a90aaa93d1835ddf6a9e3aa0f6f373cbf04ca450",
+      "bodyTextPrefix": "DOSSIER CONFIDENTIEL FR EN DOSSIER DE SOIRÉE Undercover Un mot. ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
