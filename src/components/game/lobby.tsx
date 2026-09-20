@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Copy, Eye, EyeOff, Shuffle } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PairEditor } from "@/components/game/pair-editor";
 import { Display, Kicker } from "@/components/game/shell";
 import { useNetPlay } from "@/components/game/net-app";
 import { initials, maxUndercover } from "@/lib/undercover/engine";
@@ -202,40 +203,7 @@ export function LobbyScreen() {
               </div>
             </div>
 
-            <div className="mt-8 rounded-2xl bg-elevated p-4 shadow-[0_0_0_1px_rgba(238,234,228,0.1)]">
-              <div className="flex items-center justify-between gap-3">
-                <Kicker>{x.generatePair}</Kicker>
-                {s.customCivilian ? (
-                  <button
-                    type="button"
-                    onClick={() => s.setPairHidden(!s.pairHidden)}
-                    className="flex size-11 items-center justify-center rounded-lg text-muted hover:text-fg"
-                  >
-                    {s.pairHidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                  </button>
-                ) : null}
-              </div>
-              {s.customCivilian && s.customUndercover && !s.pairHidden ? (
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-muted">{x.civilWord}</p>
-                    <p className="mt-1 font-display text-2xl tracking-tight">{s.customCivilian}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted">{x.underWord}</p>
-                    <p className="mt-1 font-display text-2xl tracking-tight">{s.customUndercover}</p>
-                  </div>
-                </div>
-              ) : s.customCivilian && s.pairHidden ? (
-                <p className="mt-3 text-sm text-muted">{x.hidePair}</p>
-              ) : (
-                <p className="mt-3 text-sm text-muted">{x.pairHint}</p>
-              )}
-              <Button className="mt-4 w-full" variant="secondary" onClick={() => s.generatePair()}>
-                <Shuffle className="size-4" />
-                {x.generatePair}
-              </Button>
-            </div>
+            <PairEditor className="mt-8" />
           </>
         ) : (
           <p className="mt-10 text-center text-sm text-muted">{x.waitingHost}</p>

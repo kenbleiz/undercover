@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNetPlay } from "@/components/game/net-app";
+import { PairEditor } from "@/components/game/pair-editor";
 import { Display, Kicker } from "@/components/game/shell";
 import { initials } from "@/lib/undercover/engine";
 import { roleLabel, t, winnerTitle } from "@/lib/undercover/i18n";
@@ -154,6 +155,10 @@ export function GameOverScreen() {
           </ul>
         </div>
       ) : null}
+
+      {net.isGuest ? null : (
+        <PairEditor className="mt-8" title={x.rematchPair} hint={x.rematchPairHint} />
+      )}
 
       <div className="mt-8 flex flex-col gap-3 pt-4">
         {net.isGuest ? (

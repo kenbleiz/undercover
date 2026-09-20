@@ -4,7 +4,7 @@ import { a as Shuffle, c as Languages, d as Copy, f as BookOpen, i as Smartphone
 import { n as clsx, t as cva } from "../_libs/class-variance-authority+clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { n as create, t as persist } from "../_libs/zustand.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BHvWMwcD.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-Bj9dQ0Si.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function cn(...inputs) {
@@ -164,6 +164,8 @@ var copy = {
 		roster: "Révélation",
 		scores: "Scores",
 		rematch: "Revanche",
+		rematchPair: "Prochaine paire",
+		rematchPairHint: "Écris tes mots, génère-les, ou laisse vide pour un tirage.",
 		newGame: "Nouvelle table",
 		resetScores: "Réinitialiser les scores",
 		back: "Retour",
@@ -314,6 +316,8 @@ var copy = {
 		roster: "Reveal",
 		scores: "Scores",
 		rematch: "Rematch",
+		rematchPair: "Next pair",
+		rematchPairHint: "Type your words, generate a pair, or leave empty to draw one.",
 		newGame: "New table",
 		resetScores: "Reset scores",
 		back: "Back",
@@ -1020,7 +1024,17 @@ var useGame = create()(persist((set, get) => ({
 		if (has && s.categories.length === 1) return s;
 		return { categories: has ? s.categories.filter((x) => x !== c) : [...s.categories, c] };
 	}),
-	setCustom: (field, value) => set(field === "civilian" ? { customCivilian: value } : { customUndercover: value }),
+	setCustom: (field, value) => set(field === "civilian" ? {
+		customCivilian: value,
+		pairId: null,
+		useCustom: true,
+		pairHidden: false
+	} : {
+		customUndercover: value,
+		pairId: null,
+		useCustom: true,
+		pairHidden: false
+	}),
 	setUseCustom: (v) => set({ useCustom: v }),
 	setSecretVote: (v) => set({ secretVote: v }),
 	setGuess: (v) => set({
@@ -1239,7 +1253,10 @@ var useGame = create()(persist((set, get) => ({
 		if (winner) return {
 			winner,
 			scores: awardScores(s.players, winner, s.scores),
-			phase: "gameover"
+			phase: "gameover",
+			customCivilian: "",
+			customUndercover: "",
+			pairId: null
 		};
 		return {
 			phase: "table",
@@ -1260,7 +1277,10 @@ var useGame = create()(persist((set, get) => ({
 				winner,
 				guessWrong: false,
 				scores: awardScores(s.players, winner, s.scores),
-				phase: "gameover"
+				phase: "gameover",
+				customCivilian: "",
+				customUndercover: "",
+				pairId: null
 			};
 		}
 		const winner = evaluateWinner(s.players);
@@ -1268,7 +1288,10 @@ var useGame = create()(persist((set, get) => ({
 			winner,
 			guessWrong: true,
 			scores: awardScores(s.players, winner, s.scores),
-			phase: "gameover"
+			phase: "gameover",
+			customCivilian: "",
+			customUndercover: "",
+			pairId: null
 		};
 		return {
 			guessWrong: true,
@@ -1281,7 +1304,7 @@ var useGame = create()(persist((set, get) => ({
 		};
 	}),
 	rematch: () => {
-		if (get().mode === "local") get().startGame({ newPair: true });
+		if (get().mode === "local") get().startGame();
 	},
 	resetScores: () => set({ scores: {} }),
 	generatePair: () => {
@@ -2159,8 +2182,10 @@ function NetSession({ code, name, isHost, children }) {
 				id: p2p.selfId,
 				name
 			}, ...guestSeats] : guestSeats;
-			const newPair = useGame.getState().phase === "gameover";
-			if (!useGame.getState().startOnlineGame(seats, { newPair })) return false;
+			const st = useGame.getState();
+			const typed = st.customCivilian.trim().length > 0 && st.customUndercover.trim().length > 0;
+			const newPair = st.phase === "gameover" && !typed;
+			if (!st.startOnlineGame(seats, { newPair })) return false;
 			const s = useGame.getState();
 			for (const pl of s.players) {
 				if (pl.id === p2p.selfId) continue;
@@ -2183,6 +2208,77 @@ function NetSession({ code, name, isHost, children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NetCtx.Provider, {
 		value: api,
 		children
+	});
+}
+function PairEditor({ title, hint, className }) {
+	const s = useGame();
+	const x = t(s.lang);
+	const uid = (0, import_react.useId)();
+	const filled = Boolean(s.customCivilian.trim() && s.customUndercover.trim());
+	const hidden = s.pairHidden && filled;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: cn("rounded-2xl bg-elevated p-4 shadow-[0_0_0_1px_rgba(238,234,228,0.1)]", className),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between gap-3",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kicker, { children: title ?? x.customDuo }), filled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					onClick: () => s.setPairHidden(!s.pairHidden),
+					className: "flex size-11 items-center justify-center rounded-lg text-muted hover:text-fg",
+					"aria-label": s.pairHidden ? x.showPair : x.hidePair,
+					children: s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "size-4" })
+				}) : null]
+			}),
+			hidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 text-sm text-muted",
+				children: x.hidePair
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-3 text-pretty text-sm leading-relaxed text-muted",
+				children: hint ?? x.pairHint
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-3 flex flex-col gap-2",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+						className: "sr-only",
+						htmlFor: `${uid}-civil`,
+						children: x.customCivil
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+						id: `${uid}-civil`,
+						value: s.customCivilian,
+						onChange: (e) => s.setCustom("civilian", e.target.value),
+						placeholder: x.customCivil,
+						maxLength: 32,
+						autoCapitalize: "off",
+						autoCorrect: "off",
+						spellCheck: false,
+						className: "bg-surface"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+						className: "sr-only",
+						htmlFor: `${uid}-under`,
+						children: x.customUnder
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+						id: `${uid}-under`,
+						value: s.customUndercover,
+						onChange: (e) => s.setCustom("undercover", e.target.value),
+						placeholder: x.customUnder,
+						maxLength: 32,
+						autoCapitalize: "off",
+						autoCorrect: "off",
+						spellCheck: false,
+						className: "bg-surface"
+					})
+				]
+			})] }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+				className: "mt-4 w-full",
+				variant: "secondary",
+				onClick: () => s.generatePair(),
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shuffle, { className: "size-4" }), x.generatePair]
+			})
+		]
 	});
 }
 function EliminatedScreen() {
@@ -2363,6 +2459,11 @@ function GameOverScreen() {
 					}, name))
 				})]
 			}) : null,
+			net.isGuest ? null : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PairEditor, {
+				className: "mt-8",
+				title: x.rematchPair,
+				hint: x.rematchPairHint
+			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "mt-8 flex flex-col gap-3 pt-4",
 				children: [net.isGuest ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -2746,48 +2847,7 @@ function LobbyScreen() {
 							})
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mt-8 rounded-2xl bg-elevated p-4 shadow-[0_0_0_1px_rgba(238,234,228,0.1)]",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kicker, { children: x.generatePair }), s.customCivilian ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									onClick: () => s.setPairHidden(!s.pairHidden),
-									className: "flex size-11 items-center justify-center rounded-lg text-muted hover:text-fg",
-									children: s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "size-4" })
-								}) : null]
-							}),
-							s.customCivilian && s.customUndercover && !s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "mt-3 grid grid-cols-2 gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-muted",
-									children: x.civilWord
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "mt-1 font-display text-2xl tracking-tight",
-									children: s.customCivilian
-								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-muted",
-									children: x.underWord
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "mt-1 font-display text-2xl tracking-tight",
-									children: s.customUndercover
-								})] })]
-							}) : s.customCivilian && s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-3 text-sm text-muted",
-								children: x.hidePair
-							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-3 text-sm text-muted",
-								children: x.pairHint
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-								className: "mt-4 w-full",
-								variant: "secondary",
-								onClick: () => s.generatePair(),
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shuffle, { className: "size-4" }), x.generatePair]
-							})
-						]
-					})
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PairEditor, { className: "mt-8" })
 				] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "mt-10 text-center text-sm text-muted",
 					children: x.waitingHost
@@ -3027,61 +3087,7 @@ function SetupScreen() {
 						})
 					})]
 				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-8 rounded-2xl bg-elevated p-4 shadow-[0_0_0_1px_rgba(238,234,228,0.1)]",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Kicker, { children: x.generatePair }), s.customCivilian ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								onClick: () => s.setPairHidden(!s.pairHidden),
-								className: "flex size-11 items-center justify-center rounded-lg text-muted hover:text-fg",
-								"aria-label": s.pairHidden ? x.showPair : x.hidePair,
-								children: s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "size-4" })
-							}) : null]
-						}),
-						s.customCivilian && s.customUndercover && !s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-3 grid grid-cols-2 gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-muted",
-								children: x.civilWord
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-1 font-display text-2xl tracking-tight",
-								children: s.customCivilian
-							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-muted",
-								children: x.underWord
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-1 font-display text-2xl tracking-tight",
-								children: s.customUndercover
-							})] })]
-						}) : s.customCivilian && s.pairHidden ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-3 text-sm text-muted",
-							children: x.hidePair
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-3 text-sm text-muted",
-							children: x.pairHint
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-							className: "mt-4 w-full",
-							variant: "secondary",
-							onClick: () => s.generatePair(),
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shuffle, { className: "size-4" }), x.generatePair]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-3 flex flex-col gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								value: s.customCivilian,
-								onChange: (e) => s.setCustom("civilian", e.target.value),
-								placeholder: x.customCivil
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								value: s.customUndercover,
-								onChange: (e) => s.setCustom("undercover", e.target.value),
-								placeholder: x.customUnder
-							})]
-						})
-					]
-				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PairEditor, { className: "mt-8" }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					type: "button",
 					onClick: () => s.setSecretVote(!s.secretVote),

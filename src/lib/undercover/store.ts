@@ -312,7 +312,11 @@ export const useGame = create<GameState & Actions>()(
           };
         }),
       setCustom: (field, value) =>
-        set(field === "civilian" ? { customCivilian: value } : { customUndercover: value }),
+        set(
+          field === "civilian"
+            ? { customCivilian: value, pairId: null, useCustom: true, pairHidden: false }
+            : { customUndercover: value, pairId: null, useCustom: true, pairHidden: false },
+        ),
       setUseCustom: (v) => set({ useCustom: v }),
       setSecretVote: (v) => set({ secretVote: v }),
       setGuess: (v) => set({ guess: v, guessWrong: false }),
@@ -553,6 +557,9 @@ export const useGame = create<GameState & Actions>()(
               winner,
               scores: awardScores(s.players, winner, s.scores),
               phase: "gameover",
+              customCivilian: "",
+              customUndercover: "",
+              pairId: null,
             };
           }
           return {
@@ -577,6 +584,9 @@ export const useGame = create<GameState & Actions>()(
               guessWrong: false,
               scores: awardScores(s.players, winner, s.scores),
               phase: "gameover" as const,
+              customCivilian: "",
+              customUndercover: "",
+              pairId: null,
             };
           }
           const winner = evaluateWinner(s.players);
@@ -586,6 +596,9 @@ export const useGame = create<GameState & Actions>()(
               guessWrong: true,
               scores: awardScores(s.players, winner, s.scores),
               phase: "gameover" as const,
+              customCivilian: "",
+              customUndercover: "",
+              pairId: null,
             };
           }
           return {
@@ -600,7 +613,7 @@ export const useGame = create<GameState & Actions>()(
         }),
 
       rematch: () => {
-        if (get().mode === "local") get().startGame({ newPair: true });
+        if (get().mode === "local") get().startGame();
       },
 
       resetScores: () => set({ scores: {} }),

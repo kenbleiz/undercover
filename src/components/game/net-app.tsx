@@ -165,8 +165,11 @@ export function NetSession({
           name: p.name || "?",
         }));
         const seats = hostPlays ? [{ id: p2p.selfId, name }, ...guestSeats] : guestSeats;
-        const newPair = useGame.getState().phase === "gameover";
-        const ok = useGame.getState().startOnlineGame(seats, { newPair });
+        const st = useGame.getState();
+        const typed =
+          st.customCivilian.trim().length > 0 && st.customUndercover.trim().length > 0;
+        const newPair = st.phase === "gameover" && !typed;
+        const ok = st.startOnlineGame(seats, { newPair });
         if (!ok) return false;
         const s = useGame.getState();
         for (const pl of s.players) {

@@ -1,6 +1,7 @@
-import { Eye, EyeOff, Minus, Plus, Shuffle, X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PairEditor } from "@/components/game/pair-editor";
 import { Display, Kicker } from "@/components/game/shell";
 import { maxUndercover } from "@/lib/undercover/engine";
 import { categoryLabel, t } from "@/lib/undercover/i18n";
@@ -159,53 +160,7 @@ export function SetupScreen() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-2xl bg-elevated p-4 shadow-[0_0_0_1px_rgba(238,234,228,0.1)]">
-        <div className="flex items-center justify-between gap-3">
-          <Kicker>{x.generatePair}</Kicker>
-          {s.customCivilian ? (
-            <button
-              type="button"
-              onClick={() => s.setPairHidden(!s.pairHidden)}
-              className="flex size-11 items-center justify-center rounded-lg text-muted hover:text-fg"
-              aria-label={s.pairHidden ? x.showPair : x.hidePair}
-            >
-              {s.pairHidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-            </button>
-          ) : null}
-        </div>
-        {s.customCivilian && s.customUndercover && !s.pairHidden ? (
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs text-muted">{x.civilWord}</p>
-              <p className="mt-1 font-display text-2xl tracking-tight">{s.customCivilian}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted">{x.underWord}</p>
-              <p className="mt-1 font-display text-2xl tracking-tight">{s.customUndercover}</p>
-            </div>
-          </div>
-        ) : s.customCivilian && s.pairHidden ? (
-          <p className="mt-3 text-sm text-muted">{x.hidePair}</p>
-        ) : (
-          <p className="mt-3 text-sm text-muted">{x.pairHint}</p>
-        )}
-        <Button className="mt-4 w-full" variant="secondary" onClick={() => s.generatePair()}>
-          <Shuffle className="size-4" />
-          {x.generatePair}
-        </Button>
-        <div className="mt-3 flex flex-col gap-2">
-          <Input
-            value={s.customCivilian}
-            onChange={(e) => s.setCustom("civilian", e.target.value)}
-            placeholder={x.customCivil}
-          />
-          <Input
-            value={s.customUndercover}
-            onChange={(e) => s.setCustom("undercover", e.target.value)}
-            placeholder={x.customUnder}
-          />
-        </div>
-      </div>
+      <PairEditor className="mt-8" />
 
       <button
         type="button"
