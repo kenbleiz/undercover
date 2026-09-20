@@ -1,0 +1,95 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: undercover
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-undercover}
+      POSTGRES_DB: undercover
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U undercover -d undercover"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - undercover
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      VITE_AUTH_ENABLED: "false"
+      DATABASE_URL: postgres://undercover:${POSTGRES_PASSWORD:-undercover}@db:5432/undercover?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
+    networks:
+      - undercover
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      TLS_SAN: ${TLS_SAN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certs:/etc/nginx/ssl
+      - certbot-www:/var/www/certbot
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - undercover
+
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["le"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-}
+      EMAIL: ${EMAIL:-}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certs:/etc/nginx/ssl
+      - certbot-www:/var/www/certbot
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        if [ -z "$${DOMAIN}" ] || [ -z "$${EMAIL}" ]; then
+          echo "Let's Encrypt: set DOMAIN and EMAIL in .env"
+          exit 1
+        fi
+        trap exit TERM
+        while :; do
+          certbot certonly --webroot -w /var/www/certbot \
+            --email "$${EMAIL}" --agree-tos --no-eff-email --non-interactive \
+            -d "$${DOMAIN}" \
+            --deploy-hook "cp /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem /etc/nginx/ssl/fullchain.pem && cp /etc/letsencrypt/live/$${DOMAIN}/privkey.pem /etc/nginx/ssl/privkey.pem"
+          sleep 12h
+        done
+    depends_on:
+      - nginx
+    networks:
+      - undercover
+
+volumes:
+  pgdata:
+  certs:
+  certbot-www:
+  letsencrypt:
+
+networks:
+  undercover:
+    driver: bridge

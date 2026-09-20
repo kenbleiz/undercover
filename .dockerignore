@@ -1,0 +1,17 @@
+node_modules
+.git
+.github
+.grok
+.vercel
+.output
+.cursor
+screenshots
+artifacts
+docker/certs
+*.md
+AGENTS.md
+AGENTS.project.md
+.env
+.env.*
+npm-debug.log*
+.DS_Store
